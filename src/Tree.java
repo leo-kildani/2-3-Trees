@@ -185,9 +185,6 @@ public class Tree {
 					if (curr.rightChild != null) {
 						stack.push(curr.rightChild);
 					}
-					if (curr.midChild != null) {
-						stack.push(curr.midChild);
-					}
 					curr = curr.midChild;
 				}
 			}
@@ -214,6 +211,38 @@ public class Tree {
 	}
 	
 	public int get(int idx) {
+		Stack<TreeNode> stack = new Stack<>();
+		TreeNode curr = root;
+		int currKey = 0;
 		
+		while (curr != null || !stack.isEmpty()) {
+			if (curr != null) {
+				stack.push(curr);
+				curr = curr.leftChild;
+			} else {
+				curr = stack.pop();
+				currKey = curr.minKey;
+				
+				if (idx-- == 0) {
+					break;
+				}
+				
+				if (curr.slots == 1) {
+					curr = curr.rightChild;
+				} else {
+					currKey = curr.maxKey;
+					
+					if (idx-- == 0) {
+						break;
+					}
+					
+					if (curr.rightChild != null) {
+						stack.push(curr.rightChild);
+					}
+					curr = curr.midChild;
+				}
+			}
+		}
+		return currKey;
 	}
 }
