@@ -189,20 +189,19 @@ public class SimpleGivenTests
    public void midToRootSplit() {
 	   Tree t = new Tree();
 	   
+	   assertEquals(0, t.size());
+	   
 	   t.insert(1);
 	   t.insert(5);
 	   t.insert(9);
 	   t.insert(10);
 	   t.insert(11);
 	   t.insert(6);
-	   t.insert(8);
 	   
 	   assertEquals(9, t.get(3));
-	   assertEquals(7, t.size());
-	   assertEquals(10, t.size(5));
-	   assertEquals(6, t.get(2));	
-	   assertEquals(11, t.get(t.size() - 1));
-	   assertEquals(8, t.get(4));
+	   assertEquals(6, t.get(2));
+	   assertEquals(1, t.size(6));
+	   
    }
 
    

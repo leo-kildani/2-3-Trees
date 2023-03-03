@@ -188,9 +188,10 @@ public class Tree {
 					curr = curr.rightChild;
 				} else {
 					size += 1;
-					if (curr.rightChild != null) {
+					
+					if (curr.rightChild != null)
 						stack.push(curr.rightChild);
-					}
+					
 					curr = curr.midChild;
 				}
 			}
@@ -238,9 +239,9 @@ public class Tree {
 				if (curr.slots == 1) {
 					curr = curr.rightChild;
 				} else {
-					if (curr.rightChild != null) {
+					
+					if (curr.rightChild != null)
 						stack.push(curr.rightChild);
-					}
 					
 					stack.push(new TreeNode(curr.maxKey));
 					
