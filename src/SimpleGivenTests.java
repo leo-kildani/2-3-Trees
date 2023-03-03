@@ -1,5 +1,7 @@
 import static org.junit.Assert.*;
 
+import javax.swing.text.DefaultEditorKit.InsertBreakAction;
+
 import org.junit.Test;
 
 
@@ -111,6 +113,97 @@ public class SimpleGivenTests
 
 
    }
+   
+   @Test
+   public void leftSplit() {
+	   Tree t = new Tree();
+	   
+	   t.insert(1);
+	   t.insert(5);
+	   t.insert(9);
+	   t.insert(-1);
+	   t.insert(0);
+	   
+	   assertEquals(0, t.get(1));
+	   assertEquals(5, t.size());
+	   assertEquals(-1, t.get(0));
+	   assertEquals(9, t.get(t.size() - 1));
+	   assertEquals(5, t.get(3));
+	   assertEquals(1, t.get(2));
+   }
+   
+   public void leftToRootSplit() {
+	   Tree t = new Tree();
+	   
+	   t.insert(1);
+	   t.insert(5);
+	   t.insert(9);
+	   t.insert(-1);
+	   t.insert(0);
+	   t.insert(-2);
+	   t.insert(-3);
+	   
+	   assertEquals(-3, t.get(0));
+	   assertEquals(7, t.size());
+	   assertEquals(-1, t.get(1));
+	   assertEquals(9, t.get(t.size() - 1));
+	   assertEquals(1, t.get(4));
+   }
+   
+   @Test
+   public void rightSplit() {
+	   Tree t = new Tree();
+	   
+	   t.insert(1);
+	   t.insert(5);
+	   t.insert(9);
+	   t.insert(10);
+	   t.insert(11);
+	   
+	   assertEquals(1, t.get(0));
+	   assertEquals(9, t.get(2));
+	   assertEquals(10, t.get(3));
+	   assertEquals(1, t.size(9));
+	   assertEquals(11, t.get(t.size() - 1));
+   }
+   
+   public void rightToRootSplit() {
+	   Tree t = new Tree();
+	   
+	   t.insert(1);
+	   t.insert(5);
+	   t.insert(9);
+	   t.insert(10);
+	   t.insert(11);
+	   t.insert(13);
+	   t.insert(14);
+	   
+	   assertEquals(10, t.get(3));
+	   assertEquals(7, t.size());
+	   assertEquals(3, t.size(5));
+	   assertEquals(5, t.get(1));	
+	   assertEquals(14, t.get(t.size() - 1));
+	   assertEquals(11, t.get(4));
+   }
+   
+   public void midToRootSplit() {
+	   Tree t = new Tree();
+	   
+	   t.insert(1);
+	   t.insert(5);
+	   t.insert(9);
+	   t.insert(10);
+	   t.insert(11);
+	   t.insert(6);
+	   t.insert(8);
+	   
+	   assertEquals(9, t.get(3));
+	   assertEquals(7, t.size());
+	   assertEquals(10, t.size(5));
+	   assertEquals(6, t.get(2));	
+	   assertEquals(11, t.get(t.size() - 1));
+	   assertEquals(8, t.get(4));
+   }
 
    
    @Test
@@ -169,16 +262,15 @@ public class SimpleGivenTests
       assertEquals(7,t.size());
    }
    
-//   @Test
-//   public void testRoot() {
-//	   Tree t = new Tree();
-//	   t.insert(10);
-//	   t.insert(11);
-//	   t.insert(12);
-//	   t.insert(15);
-//	   t.insert(16);
-//	   assertEquals(12, t.root.midChild.minKey);
-//   }
+   @Test
+   public void testnegative() {
+	   Tree t = new Tree();
+	   t.insert(-10);
+	   t.insert(-15);
+	   t.insert(-20);
+	   assertEquals(-15, t.get(1));
+	   assertEquals(3, t.size());
+   }
 
 
 }

@@ -1,3 +1,4 @@
+import java.awt.TexturePaint;
 import java.util.Stack;
 
 public class Tree {
@@ -5,7 +6,7 @@ public class Tree {
 	TreeNode root;
 	
 	public class TreeNode{
-		public int minKey = -1, maxKey = -1;
+		public Integer minKey, maxKey;
 		public TreeNode leftChild, midChild, rightChild, parent;
 		public TreeNode leftMidChild, rightMidChild;
 		public int slots;
@@ -28,7 +29,11 @@ public class Tree {
 		}
 		
 		public boolean contains(int key) {
-			return (minKey == key || maxKey == key);
+			boolean contains = false;
+			if(minKey == key || (maxKey != null && maxKey == key)) {
+				contains = true;
+			}
+			return contains;
 		}
 		
 		public int setMidKey(int key) {
@@ -69,12 +74,13 @@ public class Tree {
 			}
 			if (key < curr.minKey) {
 				curr = curr.leftChild;
-			} else if (key > curr.maxKey) {
-				curr = curr.rightChild;
 			} else {
-				curr = curr.midChild;
+				if (curr.slots == 2 && key < curr.maxKey) {
+					curr = curr.midChild;
+				} else {
+					curr = curr.rightChild;
+				}
 			}
-
 		}
 		
 		if (prev.slots == 1) {
@@ -177,11 +183,11 @@ public class Tree {
 				curr = curr.leftChild;
 			} else {
 				curr = stack.pop();
+				size++;
 				if (curr.slots == 1) {
-					size++;
 					curr = curr.rightChild;
 				} else {
-					size += 2;
+					size += 1;
 					if (curr.rightChild != null) {
 						stack.push(curr.rightChild);
 					}
@@ -200,10 +206,12 @@ public class Tree {
 			} else {
 				if (key < curr.minKey) {
 					curr = curr.leftChild;
-				} else if (key < curr.maxKey && curr.midChild != null) {
-					curr = curr.midChild;
 				} else {
-					curr = curr.rightChild;
+					if (curr.slots == 2 && key < curr.maxKey && curr.midChild != null) {
+						curr = curr.midChild;
+					} else {
+						curr = curr.rightChild;
+					}
 				}
 			}
 		}
@@ -230,15 +238,12 @@ public class Tree {
 				if (curr.slots == 1) {
 					curr = curr.rightChild;
 				} else {
-					currKey = curr.maxKey;
-					
-					if (idx-- == 0) {
-						break;
-					}
-					
 					if (curr.rightChild != null) {
 						stack.push(curr.rightChild);
 					}
+					
+					stack.push(new TreeNode(curr.maxKey));
+					
 					curr = curr.midChild;
 				}
 			}
