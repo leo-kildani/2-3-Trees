@@ -1,4 +1,3 @@
-import java.awt.TexturePaint;
 import java.util.Stack;
 
 public class Tree {
@@ -50,6 +49,39 @@ public class Tree {
 			return midKey;
 		}
 		
+		public void distributeChildren(TreeNode left, TreeNode right, TreeNode p) {
+			left.parent = p;
+			right.parent = p;
+			
+			if (this.leftChild != null) {
+				left.leftChild = this.leftChild;
+				this.leftChild.parent = left;
+			}
+			if (this.leftMidChild != null) {
+				left.rightChild = this.leftMidChild;
+				this.leftMidChild.parent = left;
+			}
+			if (this.rightMidChild != null) {
+				right.leftChild = this.rightMidChild;
+				this.rightMidChild.parent = right;
+			}
+			if (this.rightChild != null) {
+				right.rightChild = this.rightChild;
+				this.rightChild.parent = right;
+			}
+		}
+		
+		public TreeNode search(int target) {
+			if (this.contains(target)) return this;
+			
+			if (target < minKey) {
+				leftChild.search(target);
+			} else {
+				if (slots == 1) {
+					// LEFT OFF HERE
+				}
+			}
+			
 	}
 	
 	public Tree() {
@@ -103,7 +135,7 @@ public class Tree {
 		if (curr != root) {
 			TreeNode p = curr.parent;
 			
-			distributeChildren(curr, left, right, p);
+			curr.distributeChildren(left, right, p);
 			
 			// determine where split is coming from and what type node is being split
 			if (p.slots == 1) {
@@ -138,31 +170,11 @@ public class Tree {
 				root = newNode;
 				newNode.leftChild = left;
 				newNode.rightChild = right;
-				distributeChildren(curr, left, right, newNode);
+				curr.distributeChildren(left, right, newNode);
 		}		
 	}
 	
-	private void distributeChildren(TreeNode nodeToSplit, TreeNode left, TreeNode right, TreeNode p) {
-		left.parent = p;
-		right.parent = p;
-		
-		if (nodeToSplit.leftChild != null) {
-			left.leftChild = nodeToSplit.leftChild;
-			nodeToSplit.leftChild.parent = left;
-		}
-		if (nodeToSplit.leftMidChild != null) {
-			left.rightChild = nodeToSplit.leftMidChild;
-			nodeToSplit.leftMidChild.parent = left;
-		}
-		if (nodeToSplit.rightMidChild != null) {
-			right.leftChild = nodeToSplit.rightMidChild;
-			nodeToSplit.rightMidChild.parent = right;
-		}
-		if (nodeToSplit.rightChild != null) {
-			right.rightChild = nodeToSplit.rightChild;
-			nodeToSplit.rightChild.parent = right;
-		}
-	}
+	
 	
 	public int size() {
 		if (root == null) return 0;
@@ -170,10 +182,10 @@ public class Tree {
 	}
 	
 	public int size(int key) {
-		int size = 0;
 		TreeNode subRoot = search(key);
-		if (subRoot == null) return size;
+		if (subRoot == null) return 0;
 		
+		int size = 0;
 		Stack<TreeNode> stack = new Stack<>();
 		TreeNode curr = subRoot;
 		
@@ -200,23 +212,23 @@ public class Tree {
 	}
 	
 	private TreeNode search(int key) {
-		TreeNode curr = root;
-		while (curr != null) {
-			if (curr.contains(key)) {
-				return curr;
-			} else {
-				if (key < curr.minKey) {
-					curr = curr.leftChild;
-				} else {
-					if (curr.slots == 2 && key < curr.maxKey && curr.midChild != null) {
-						curr = curr.midChild;
-					} else {
-						curr = curr.rightChild;
-					}
-				}
-			}
-		}
-		return null;
+		if (root == null) return null;
+		
+		return root.search(key);
+//		while (curr != null) {
+//			if (curr.contains(key)) {
+//				return curr;
+//			} else {
+//				if (key < curr.minKey) {
+//					curr = curr.leftChild;
+//				} else {
+//					if (curr.slots == 2 && key < curr.maxKey && curr.midChild != null) {
+//						curr = curr.midChild;
+//					} else {
+//						curr = curr.rightChild;
+//					}
+//				}
+//			}
 	}
 	
 	public int get(int idx) {
