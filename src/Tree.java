@@ -1,87 +1,99 @@
-import java.util.Stack;
-
 public class Tree {
 	
 	TreeNode root;
 	
 	public class TreeNode{
-		public Integer minKey, maxKey;
-		public TreeNode leftChild, midChild, rightChild, parent;
-		public TreeNode leftMidChild, rightMidChild;
-		public int slots;
+		public int keys[] = new int[3];
+		public TreeNode[] children = new TreeNode[4];
+		public boolean isLeaf = true;
+		public int keySlots = 0;
+		public TreeNode parent;
 		
+		public TreeNode() {
 		
-		public TreeNode(int val) {
-			minKey = val;
-			slots = 1;
 		}
 		
-		// add key to node, return middle value if slots are full
-		public void addKey(int newKey) {
-			if (newKey > minKey) {
-				maxKey = newKey;
-			} else {
-				maxKey = minKey;
-				minKey = newKey;
+		public TreeNode(int key) {
+			keys[0] = key;
+			keySlots++;
+		}
+		
+		// add key to node (only called when there is space)
+		public void addKey(int newKey, TreeNode left, TreeNode right) {
+			int i = keySlots;
+			TreeNode temp = children[keySlots];
+			
+			// insertion sort on keys; if keys shift, children shift
+			while (i > 0 && keys[i - 1] > newKey) {
+				keys[i] = keys[i - 1];
+				children[i] = children[i - 1];
+				i--;
 			}
-			slots = 2;
+			
+			// fill in children/keys slots that are empty after shift
+			keys[i] = newKey;
+			children[i] = left;
+			
+			if (i == keySlots) {
+				children[++keySlots] = right;
+			} else {
+				children[++i] = right;
+				children[++keySlots] = temp;
+			}
+		}
+		
+		public int getMedian() {
+			return (keys[keys.length / 2]);
 		}
 		
 		public boolean contains(int key) {
-			boolean contains = false;
-			if(minKey == key || (maxKey != null && maxKey == key)) {
-				contains = true;
+			for (int i = 0; i < keySlots; i++) {
+				if (keys[i] == key)
+					return true;
 			}
-			return contains;
-		}
-		
-		public int setMidKey(int key) {
-			int midKey;
-			if (key < minKey) {
-				midKey = minKey;
-				minKey = key;
-			} else if (key > maxKey) {
-				midKey = maxKey;
-				maxKey = key;
-			} else {
-				midKey = key;
-			}
-			return midKey;
-		}
-		
-		public void distributeChildren(TreeNode left, TreeNode right, TreeNode p) {
-			left.parent = p;
-			right.parent = p;
-			
-			if (this.leftChild != null) {
-				left.leftChild = this.leftChild;
-				this.leftChild.parent = left;
-			}
-			if (this.leftMidChild != null) {
-				left.rightChild = this.leftMidChild;
-				this.leftMidChild.parent = left;
-			}
-			if (this.rightMidChild != null) {
-				right.leftChild = this.rightMidChild;
-				this.rightMidChild.parent = right;
-			}
-			if (this.rightChild != null) {
-				right.rightChild = this.rightChild;
-				this.rightChild.parent = right;
-			}
+			return false;
 		}
 		
 		public TreeNode search(int target) {
-			if (this.contains(target)) return this;
+			if (this.isLeaf) return this;
 			
-			if (target < minKey) {
-				leftChild.search(target);
+			int i = 0;
+			// determine what key/child to check
+			while (i < keySlots && target > keys[i]) {
+				i++;
+			}
+			if (i < keySlots && target == keys[i]) {
+				return this;
 			} else {
-				if (slots == 1) {
-					// LEFT OFF HERE
-				}
+				return children[i].search(target);	
+			}
+		}
+		
+		public TreeNode split() {
+			TreeNode returnNode = null;
+			TreeNode left = new TreeNode(keys[0]);
+			TreeNode right = new TreeNode(keys[2]);
+			
+			left.children[0] = children[0];
+			left.children[1] = children[1];
+			right.children[0] = children[2];
+			right.children[1] = children[3];
+			if (parent == null) {
+				parent = new TreeNode();
+				returnNode = parent;
 			}
 			
+			left.parent = parent;
+			right.parent = parent;
+			parent.addKey(getMedian(), left, right);
+			parent.isLeaf = false;
+			if (parent.keySlots == parent.keys.length) {
+				returnNode = parent.split();
+			}
+			
+			return returnNode;
+			
+		}
 	}
 	
 	public Tree() {
@@ -90,177 +102,41 @@ public class Tree {
 	
 	public boolean insert(int key) {
 		if (root == null) {
-			TreeNode newNode = new TreeNode(key);
-			root = newNode;
+			TreeNode newRoot = new TreeNode(key);
+			root = newRoot;
 			return true;
+		} 
+		
+		TreeNode nodeToInsert = root.search(key);
+		if (nodeToInsert.contains(key)) {
+			return false;
 		}
 		
-		// find leaf to insert key
-		TreeNode curr = root;
-		TreeNode prev = null;
-		
-		while (curr != null) {
-			prev = curr;
-			if (curr.contains(key)) {
-				return false;
-			}
-			if (key < curr.minKey) {
-				curr = curr.leftChild;
-			} else {
-				if (curr.slots == 2 && key < curr.maxKey) {
-					curr = curr.midChild;
-				} else {
-					curr = curr.rightChild;
-				}
-			}
-		}
-		
-		if (prev.slots == 1) {
-			prev.addKey(key);
-		} else {
-			split(prev, key);
+		nodeToInsert.addKey(key, null, null);
+		if (nodeToInsert.keySlots == nodeToInsert.keys.length) {
+			split(nodeToInsert);
 		}
 		return true;
-		
 	}
 	
-	private void split(TreeNode curr, Integer key) {
-		// split TreeNode 
-		int midKey = curr.setMidKey(key);  
+	public void split(TreeNode node) {
+		TreeNode changedRoot = node.split();
+		if (changedRoot != null) {
+			root = changedRoot;
+		}
 		
-		// make new nodes from minKey, maxKey
-		TreeNode left = new TreeNode(curr.minKey);
-		TreeNode right= new TreeNode(curr.maxKey);
-		
-		if (curr != root) {
-			TreeNode p = curr.parent;
-			
-			curr.distributeChildren(left, right, p);
-			
-			// determine where split is coming from and what type node is being split
-			if (p.slots == 1) {
-				p.addKey(midKey);
-				if (p.leftChild == curr){
-					p.leftChild = left;
-					p.midChild = right;
-				} else {
-					p.midChild = left;
-					p.rightChild = right;
-				}
-			} else {
-				if (p.leftChild == curr) {
-					p.leftChild = left;
-					p.leftMidChild = right;
-					p.rightMidChild = p.midChild;
-					p.midChild = null;
-				} else if (p.midChild == curr) {
-					p.leftMidChild = left;
-					p.rightMidChild = right;
-					p.midChild = null;
-				} else {
-					p.leftMidChild = p.midChild;
-					p.midChild = null;
-					p.rightMidChild = left;
-					p.rightChild = right;
-				}
-				split(p, midKey);
-			} 
-		} else {
-				TreeNode newNode = new TreeNode(midKey);
-				root = newNode;
-				newNode.leftChild = left;
-				newNode.rightChild = right;
-				curr.distributeChildren(left, right, newNode);
-		}		
 	}
-	
 	
 	
 	public int size() {
-		if (root == null) return 0;
-		return size(root.minKey);
+		return 0;
 	}
 	
 	public int size(int key) {
-		TreeNode subRoot = search(key);
-		if (subRoot == null) return 0;
-		
-		int size = 0;
-		Stack<TreeNode> stack = new Stack<>();
-		TreeNode curr = subRoot;
-		
-		while (curr != null || !stack.isEmpty()) {
-			if (curr != null) {
-				stack.push(curr);
-				curr = curr.leftChild;
-			} else {
-				curr = stack.pop();
-				size++;
-				if (curr.slots == 1) {
-					curr = curr.rightChild;
-				} else {
-					size += 1;
-					
-					if (curr.rightChild != null)
-						stack.push(curr.rightChild);
-					
-					curr = curr.midChild;
-				}
-			}
-		}
-		return size;
-	}
-	
-	private TreeNode search(int key) {
-		if (root == null) return null;
-		
-		return root.search(key);
-//		while (curr != null) {
-//			if (curr.contains(key)) {
-//				return curr;
-//			} else {
-//				if (key < curr.minKey) {
-//					curr = curr.leftChild;
-//				} else {
-//					if (curr.slots == 2 && key < curr.maxKey && curr.midChild != null) {
-//						curr = curr.midChild;
-//					} else {
-//						curr = curr.rightChild;
-//					}
-//				}
-//			}
+		return 0;
 	}
 	
 	public int get(int idx) {
-		Stack<TreeNode> stack = new Stack<>();
-		TreeNode curr = root;
-		int currKey = 0;
-		
-		while (curr != null || !stack.isEmpty()) {
-			if (curr != null) {
-				stack.push(curr);
-				curr = curr.leftChild;
-			} else {
-				curr = stack.pop();
-				currKey = curr.minKey;
-				
-				if (idx-- == 0) {
-					break;
-				}
-				
-				if (curr.slots == 1) {
-					curr = curr.rightChild;
-				} else {
-					
-					if (curr.rightChild != null)
-						stack.push(curr.rightChild);
-					
-					stack.push(new TreeNode(curr.maxKey));
-					
-					curr = curr.midChild;
-				}
-			}
-		}
-		return currKey;
+		return 0;
 	}
 }
