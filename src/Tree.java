@@ -10,7 +10,7 @@ public class Tree {
 		public TreeNode parent;
 		
 		public TreeNode() {
-		
+			// Default constructor
 		}
 		
 		public TreeNode(int key) {
@@ -42,6 +42,7 @@ public class Tree {
 			}
 		}
 		
+		// Return the middle key of a node
 		public int getMedian() {
 			return (keys[keys.length / 2]);
 		}
@@ -54,6 +55,7 @@ public class Tree {
 			return false;
 		}
 		
+		// Search for key, if node contains key, return; recurse until leaf is hit
 		public TreeNode search(int target) {
 			if (this.isLeaf) return this;
 			
@@ -92,7 +94,16 @@ public class Tree {
 			}
 			
 			return returnNode;
-			
+		}
+		
+		public int size() {
+			int size = 1;
+			for (int i = 0; i < children.length; i++) {
+				if (children[i] != null) {
+					size += children[i].size();
+				}
+			}
+			return size;
 		}
 	}
 	
@@ -129,14 +140,22 @@ public class Tree {
 	
 	
 	public int size() {
-		return 0;
+		if (root == null) {
+			return 0;
+		}
+		return root.size();
 	}
 	
 	public int size(int key) {
+		TreeNode subRoot = root.search(key);
+		if (subRoot.contains(key)) {
+			return subRoot.size();
+		}
 		return 0;
 	}
 	
 	public int get(int idx) {
-		return 0;
+		TreeNode curr = root;
+		for ()
 	}
 }
