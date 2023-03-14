@@ -1,3 +1,5 @@
+import static org.junit.Assert.assertNotNull;
+
 public class Tree {
 	
 	TreeNode root;
@@ -21,6 +23,7 @@ public class Tree {
 		// add key to node (only called when there is space)
 		public void addKey(int newKey, TreeNode left, TreeNode right) {
 			int i = keySlots;
+			
 			TreeNode temp = children[keySlots];
 			
 			// insertion sort on keys; if keys shift, children shift
@@ -76,19 +79,29 @@ public class Tree {
 			TreeNode left = new TreeNode(keys[0]);
 			TreeNode right = new TreeNode(keys[2]);
 			
-			left.children[0] = children[0];
-			left.children[1] = children[1];
-			right.children[0] = children[2];
-			right.children[1] = children[3];
+			// redistribute children/parents
+			left.isLeaf = isLeaf;
+			right.isLeaf = isLeaf;
+			for (int i = 0; i < children.length/2; i++) {
+				left.children[i] = children[i];
+				if (left.children[i] != null) {
+					left.children[i].parent = left;
+				}
+				right.children[i] = children[children.length/2 + i];
+				if (right.children[i] != null) {
+					right.children[i].parent = right;
+				}
+			}
+			
 			if (parent == null) {
 				parent = new TreeNode();
 				returnNode = parent;
+				parent.isLeaf = false;
 			}
-			
 			left.parent = parent;
 			right.parent = parent;
 			parent.addKey(getMedian(), left, right);
-			parent.isLeaf = false;
+
 			if (parent.keySlots == parent.keys.length) {
 				returnNode = parent.split();
 			}
@@ -97,12 +110,13 @@ public class Tree {
 		}
 		
 		public int size() {
-			int size = 1;
+			int size = keySlots;
 			for (int i = 0; i < children.length; i++) {
 				if (children[i] != null) {
 					size += children[i].size();
 				}
-			}
+				
+			}	
 			return size;
 		}
 	}
@@ -138,7 +152,6 @@ public class Tree {
 		
 	}
 	
-	
 	public int size() {
 		if (root == null) {
 			return 0;
@@ -155,7 +168,22 @@ public class Tree {
 	}
 	
 	public int get(int idx) {
-		TreeNode curr = root;
-		for ()
+		if (cnt != 0) cnt = 0;
+		return get(root, idx);
+	}
+	
+	private int cnt = 0;
+	private Integer get(TreeNode node, int idx) {
+		for (int i = 0; i <= node.keySlots; i++) {
+			if (node.children[i] != null) {
+				Integer res = get(node.children[i], idx);
+				if (res != null) return res;
+			}
+			
+			if (i < node.keySlots && cnt++ == idx) {
+				return node.keys[i];
+			}
+		}
+		return null;
 	}
 }
