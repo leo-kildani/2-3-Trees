@@ -118,7 +118,7 @@ public class Tree {
 			return size;
 		}
 		
-		private int get(int idx) {
+		public int get(int idx) {
 			for (int i = 0; i <= keySlots; i++) {
 				if (children[i] != null) {
 					int size = children[i].size();
