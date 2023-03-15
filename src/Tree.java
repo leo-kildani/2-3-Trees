@@ -1,5 +1,3 @@
-import static org.junit.Assert.assertNotNull;
-
 public class Tree {
 	
 	TreeNode root;
@@ -119,6 +117,24 @@ public class Tree {
 			}	
 			return size;
 		}
+		
+		private int get(int idx) {
+			for (int i = 0; i <= keySlots; i++) {
+				if (children[i] != null) {
+					int size = children[i].size();
+					if (children[i].size() > idx - cnt) {
+						return children[i].get(idx);
+					} else {
+						cnt += size;
+					}
+				}
+				
+				if (i < keySlots && cnt++ == idx) {
+					return keys[i];
+				}
+			}
+			return 0;
+		}
 	}
 	
 	public Tree() {
@@ -167,23 +183,9 @@ public class Tree {
 		return 0;
 	}
 	
+	private int cnt = 0;
 	public int get(int idx) {
 		if (cnt != 0) cnt = 0;
-		return get(root, idx);
-	}
-	
-	private int cnt = 0;
-	private Integer get(TreeNode node, int idx) {
-		for (int i = 0; i <= node.keySlots; i++) {
-			if (node.children[i] != null) {
-				Integer res = get(node.children[i], idx);
-				if (res != null) return res;
-			}
-			
-			if (i < node.keySlots && cnt++ == idx) {
-				return node.keys[i];
-			}
-		}
-		return null;
+		return root.get(idx);
 	}
 }
