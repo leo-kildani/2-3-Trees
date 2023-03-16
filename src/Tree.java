@@ -8,6 +8,7 @@ public class Tree {
 		public boolean isLeaf = true;
 		public int keySlots = 0;
 		public TreeNode parent;
+		public int size = 0;
 		
 		public TreeNode() {
 			// Default constructor
@@ -16,6 +17,7 @@ public class Tree {
 		public TreeNode(int key) {
 			keys[0] = key;
 			keySlots++;
+			size++;
 		}
 		
 		// add key to node (only called when there is space)
@@ -33,6 +35,15 @@ public class Tree {
 			
 			// fill in children/keys slots that are empty after shift
 			keys[i] = newKey;
+			size++;
+			
+			// increment parent
+			TreeNode p = parent;
+			while (p != null) {
+				p.size++;
+				p = p.parent;
+			}
+			
 			children[i] = left;
 			
 			if (i == keySlots) {
@@ -80,13 +91,13 @@ public class Tree {
 			// redistribute children/parents
 			left.isLeaf = isLeaf;
 			right.isLeaf = isLeaf;
-			for (int i = 0; i < children.length/2; i++) {
-				left.children[i] = children[i];
-				if (left.children[i] != null) {
+			if (!isLeaf) {
+				for (int i = 0; i < (keySlots + 1)/2; i++) {
+					left.children[i] = children[i];
+					left.size += children[i].size;
 					left.children[i].parent = left;
-				}
-				right.children[i] = children[children.length/2 + i];
-				if (right.children[i] != null) {
+					right.children[i] = children[(keySlots + 1)/2 + i];
+					right.size += children[(keySlots + 1)/2 + i].size;
 					right.children[i].parent = right;
 				}
 			}
@@ -95,11 +106,20 @@ public class Tree {
 				parent = new TreeNode();
 				returnNode = parent;
 				parent.isLeaf = false;
+				parent.size = size;
 			}
+			
 			left.parent = parent;
 			right.parent = parent;
 			parent.addKey(getMedian(), left, right);
-
+			
+			// Decrement parent
+			TreeNode p = parent;
+			while (p != null) {
+				p.size--;
+				p = p.parent;
+			}
+			
 			if (parent.keySlots == parent.keys.length) {
 				returnNode = parent.split();
 			}
@@ -107,31 +127,18 @@ public class Tree {
 			return returnNode;
 		}
 		
-		public int size() {
-			int size = keySlots;
-			for (int i = 0; i < children.length; i++) {
-				if (children[i] != null) {
-					size += children[i].size();
-				}
-				
-			}	
-			return size;
-		}
-		
 		public int get(int idx) {
 			for (int i = 0; i <= keySlots; i++) {
 				if (children[i] != null) {
-					int size = children[i].size();
-					if (children[i].size() > idx - cnt) {
-						return children[i].get(idx);
+					if (children[i].size > idx - cnt) {
+						 return children[i].get(idx);
 					} else {
-						cnt += size;
+						 cnt += children[i].size;
 					}
 				}
-				
-				if (i < keySlots && cnt++ == idx) {
-					return keys[i];
-				}
+				 if (i < keySlots && cnt++ == idx) {
+					 return keys[i];
+				 }
 			}
 			return 0;
 		}
@@ -143,8 +150,7 @@ public class Tree {
 	
 	public boolean insert(int key) {
 		if (root == null) {
-			TreeNode newRoot = new TreeNode(key);
-			root = newRoot;
+			root = new TreeNode(key);
 			return true;
 		} 
 		
@@ -172,13 +178,13 @@ public class Tree {
 		if (root == null) {
 			return 0;
 		}
-		return root.size();
+		return root.size;
 	}
 	
 	public int size(int key) {
 		TreeNode subRoot = root.search(key);
 		if (subRoot.contains(key)) {
-			return subRoot.size();
+			return subRoot.size;
 		}
 		return 0;
 	}
